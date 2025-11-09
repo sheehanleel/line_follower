@@ -8,7 +8,7 @@ from webots_ros2_driver.webots_controller import WebotsController
 
 def generate_launch_description():
     package_dir = get_package_share_directory('line_follower')
-    robot_description = os.path.join(package_dir, 'urdf', 'my_robot.urdf')
+    robot_description_path = os.path.join(package_dir, 'urdf', 'my_robot.urdf')
 
     webots = WebotsLauncher(
         world=os.path.join(package_dir, 'worlds', 'e-puck_line_follower.wbt')
@@ -19,6 +19,7 @@ def generate_launch_description():
         output='screen',
         parameters=[
             os.path.join(package_dir, 'config', 'line_follower_params.yaml'),
+            {'robot_description': robot_description_path},
             {'plugin': 'line_follower.line_follower_node.MyEpuckDriver'}
         ]
     )
