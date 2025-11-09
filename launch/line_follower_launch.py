@@ -20,15 +20,15 @@ def generate_launch_description():
         package='line_follower',
         executable='line_follower_node',
         output='screen',
-        additional_env={'WEBOTS_CONTROLLER_URL': controller_url_prefix() + 'e-puck'},
+        additional_env={'WEBOTS_CONTROLLER_URL': controller_url_prefix() + 'e_puck'},
         parameters=[
             os.path.join(package_dir, 'config', 'line_follower_params.yaml')
         ],
         remappings=[
             ('/cmd_vel', '/e-puck/cmd_vel'),
-            ('/ground_sensor_0', '/e-puck/ground_sensor_0'),
-            ('/ground_sensor_1', '/e-puck/ground_sensor_1'),
-            ('/ground_sensor_7', '/e-puck/ground_sensor_7'),
+            ('/ground_sensor_0', '/e_puck/ground_sensor_0'),
+            ('/ground_sensor_1', '/e_puck/ground_sensor_1'),
+            ('/ground_sensor_7', '/e_puck/ground_sensor_7'),
         ]
     )
 
