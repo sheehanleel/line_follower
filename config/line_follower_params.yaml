@@ -1,0 +1,4 @@
+line_follower_node:
+  ros__parameters:
+    sensor_threshold: 600
+    max_speed: 0.15
