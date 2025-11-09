@@ -10,7 +10,7 @@ from webots_ros2_driver.utils import controller_url_prefix
 
 def generate_launch_description():
     package_dir = get_package_share_directory('line_follower')
-    robot_description = pathlib.Path(os.path.join(package_dir, 'resource', 'my_robot.urdf')).read_text()
+    robot_description = pathlib.Path(os.path.join(package_dir, 'urdf', 'my_robot.urdf')).read_text()
 
     webots = WebotsLauncher(
         world=os.path.join(package_dir, 'worlds', 'e-puck_line_follower.wbt')
