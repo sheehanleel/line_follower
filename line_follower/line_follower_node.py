@@ -22,9 +22,9 @@ class LineFollowerNode(Node):
         self.declare_parameter('max_linear_velocity', 0.2)
 
         # Create subscribers
-        self.create_subscription(Float32, 'ground_sensor_0', self.sensor_callback, 10)
-        self.create_subscription(Float32, 'ground_sensor_1', self.sensor_callback, 10)
-        self.create_subscription(Float32, 'ground_sensor_7', self.sensor_callback, 10)
+        self.create_subscription(Float32, 'ground_sensor_0', self.sensor_0_callback, 10)
+        self.create_subscription(Float32, 'ground_sensor_1', self.sensor_1_callback, 10)
+        self.create_subscription(Float32, 'ground_sensor_7', self.sensor_7_callback, 10)
 
         # Create publisher
         self.cmd_vel_publisher = self.create_publisher(Twist, 'cmd_vel', 10)
