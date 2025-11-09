@@ -12,6 +12,7 @@ wheelRadius = 0.025
 
 class MyEpuckDriver():
     def __init__(self, webots_node, properties):
+        self.node = webots_node
         self.robot = webots_node.robot
 
         #set Motors
@@ -26,8 +27,6 @@ class MyEpuckDriver():
         self.declare_parameter('sensor_threshold', 600)
         self.declare_parameter('base_speed_ratio', 0.5)
         self.declare_parameter('max_linear_velocity', 0.2)
-
-        rclpy.init(args=None)
 
         # Create subscribers
         self.create_subscription(Float32, 'ground_sensor_0', self.sensor_0_callback, 10)
@@ -63,9 +62,9 @@ class MyEpuckDriver():
         self.sensor_7 = msg.data
 
     def control_loop(self):
-        threshold = self.get_parameter('sensor_threshold').get_parameter_value().double_value
-        speed_ratio = self.get_parameter('base_speed_ratio').get_parameter_value().double_value
-        max_linear_velocity = self.get_parameter('max_linear_velocity').get_parameter_value().double_value
+        threshold = self.node.get_parameter('sensor_threshold').get_parameter_value().double_value
+        speed_ratio = self.node.get_parameter('base_speed_ratio').get_parameter_value().double_value
+        max_linear_velocity = self.node.get_parameter('max_linear_velocity').get_parameter_value().double_value
         base_speed = speed_ratio * max_linear_velocity
         # Get latest sensor readings
         s0 = self.sensor_0
