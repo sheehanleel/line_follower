@@ -1,4 +1,4 @@
-line_follower_node:
+MyEpuckDriver:
   ros__parameters:
     sensor_threshold: 600
     base_speed_ratio: 0.5
