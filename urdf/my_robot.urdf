@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <robot name="My robot">
     <webots>
-        <plugin type="line_follower.line_follower_node.EpuckLineDriver" />
+        <plugin type="line_follower.line_follower_node.LineFollowerNode" />
     </webots>
 </robot>

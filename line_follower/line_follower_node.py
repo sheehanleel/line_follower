@@ -1,132 +1,90 @@
-#to read messages from node controller
-from std_msgs.msg import Float32
-
-
-# import ros2 librarys
+# import ros2 libraries
 import rclpy
+from std_msgs.msg import Float32
 from geometry_msgs.msg import Twist
 from rclpy.node import Node
-
 
 #Robots Constant Attributes
 maxSpeed = 6.28
 halfDistanceBetweenWheels = 0.045
 wheelRadius = 0.025
 
-class LineFollowerDriver(Node):
-    def __init__(self, webotsNode, properties):
-        super().__init__('epuck_driver')
+#Create a node for webots simulator as ros2 as the controller
 
-        self.robot = webotsNode.robot
+class LineFollowerNode(Node):
+    def __init__(self):
+        # Initialize node
+        super().__init__('line_follower_node')
 
-        #Motors
+        # Declare parameters
+        self.declare_parameter('sensor_threshold', 600)
+        self.declare_parameter('base_speed_ratio', 0.5)
+        self.declare_parameter('max_linear_velocity', 0.2)
 
-        self.leftMotor = self.robot.GetDevice('left wheel motor')
-        self.rightMotor = self.robot.GetDevice('right wheel motor')
-        self.leftMotor.setPosition(float('inf'))
-        self.rightMotor.setPosition(float('inf'))
-        self.leftMotor.setVelocity(0.0)
-        self.rightMotor.setVelocity(0.0)
+        # Create subscribers
+        self.create_subscription(Float32, 'ground_sensor_0', self.sensor_callback, 10)
+        self.create_subscription(Float32, 'ground_sensor_1', self.sensor_callback, 10)
+        self.create_subscription(Float32, 'ground_sensor_7', self.sensor_callback, 10)
 
-        #Ground Sensors
-        self.gs0 = self.robot.getDevice('g0')
-        self.gs1 = self.robot.getDevice('g1')
-        self.gs2 = self.robot.getDevice('g2')
-        self.gs0.enable(self.timestep)
-        self.gs1.enable(self.timestep)
-        self.gs2.enable(self.timestep)
+        # Create publisher
+        self.cmd_vel_publisher = self.create_publisher(Twist, 'cmd_vel', 10)
 
-        
-        
-        #Create the Publisher 
-        self.cmdVelPub = self.create_publisher(Twist, 'cmd_vel', 10)
+        # Initialize state variables
+        self.sensor_0 = 0.0
+        self.sensor_1 = 0.0
+        self.sensor_7 = 0.0
 
-        #Create the Subcribers (ground sensors)
-        self.create_subscription(Float32, 'ground_sensor_0', self.sensor_0_callback, 10)
-        self.create_subscription(Float32, 'ground_sensor_1', self.sensor_1_callback, 10)
-        self.create_subscription(Float32, 'ground_sensor_7', self.sensor_7_callback, 10)
+        # Create control timer
+        self.control_timer = self.create_timer(0.1, self.control_loop)
 
-    #Gets the msg from the subcribers
     def sensor_0_callback(self, msg):
-        self.sensor0 = msg.data
+        # Store sensor value when new data arrives
+        self.sensor_0 = msg.data
 
     def sensor_1_callback(self, msg):
-        self.sensor1 = msg.data
+        # Store sensor value when new data arrives
+        self.sensor_1 = msg.data
+        
 
     def sensor_7_callback(self, msg):
-        self.sensor7 = msg.data
-    
-        #Ground Sensors
-        """
-        self.gs = []
-        self.gsNames = ['gs0', 'gs1', 'gs2']
+        # Store sensor value when new data arrives
+        self.sensor_7 = msg.data
 
-        for name in self.gsNames:
-            sensor = robot.getDevice(name)
-            sensor.enable(self.timestep)
-            self.gs.append(sensor)
-        """
-        
-        """
-        #Initialize Motors
-        self.leftMotor = robot.getDevice('left wheel motor')
-        self.rightMotor = robot.getDevice('right wheel motor')
-        self.leftMotor.setPosition(float('inf'))
-        self.rightMotor.setPosition(float('inf'))
-        self.leftMotor.setVelocity(0.0)
-        self.rightMotor.setVelocity(0.0)
-
-        self.target_twist = Twist() 
-        
-        """
-
-    def lineFollowingLogic(self):
-        print("THIS WOKLS") # to check if this shit works
-
-        #Code behaviour from my controller lab 2 but changed the variables to fit the requirements
-
-        # read ground sensors outputs
-        line_right = self.sensor0 < 600
-        line_center = self.sensor1 < 600
-        line_left = self.sensor7 < 600
-
-        print("Ground Sensors Values: ", self.sensor0, self.sensor1, self.sensor7 )
-        print("Ground Sensors: ", line_right, line_center, line_left)
-
-        baseSpeed = maxSpeed
-
-        # initialize motor speeds at MAX SPEED
-        leftSpeed  = baseSpeed
-        rightSpeed = baseSpeed
-
-        #Implement line following behavior
+    def control_loop(self):
+        threshold = self.get_parameter('sensor_threshold').get_parameter_value().double_value
+        speed_ratio = self.get_parameter('base_speed_ratio').get_parameter_value().double_value
+        max_linear_velocity = self.get_parameter('max_linear_velocity').get_parameter_value().double_value
+        base_speed = speed_ratio * max_linear_velocity
+        # Get latest sensor readings
+        s0 = self.sensor_0
+        s1 = self.sensor_1
+        s7 = self.sensor_7
+        # Apply line-following logic
+        line_right = s0 < threshold
+        line_center = s1 < threshold
+        line_left = s7 < threshold
+        # Calculate desired velocities
+        linear_velocity = base_speed
+        angular_velocity = 0.0
         if line_center:
-            # on track: go forward
-            leftSpeed  = 1 * baseSpeed
-            rightSpeed = 1 * baseSpeed
+            angular_velocity = 0.0
         elif line_left:
-            # line is on the left: turn left
-            leftSpeed  = 1 * baseSpeed
-            rightSpeed = 0.77 * baseSpeed
+            angular_velocity = 1.0
         elif line_right:
-            # line is on the right: turn right
-            leftSpeed  = 0.77 * baseSpeed
-            rightSpeed = 1 * baseSpeed
+            angular_velocity = -1.0
         else:
-            # line is lost: stop or slow down
-            leftSpeed = 0
-            rightSpeed = 0
-        
-        # Get the data from the publisher and process it
-        twist = Twist()
-        twist.linear.x = (leftSpeed + rightSpeed) / 2.0 / maxSpeed
-        twist.angular.z = (rightSpeed - leftSpeed) / (2 * halfDistanceBetweenWheels * maxSpeed)
-
-        self.cmdVelPub.publish(twist)
-    
+            angular_velocity = 0.0
+        # Create Twist message
+        twist_msg = Twist()
+        twist_msg.linear.x = linear_velocity
+        twist_msg.angular.z = angular_velocity
+        # Publish command velocities
+        # Publish Twist message
+        self.cmd_vel_publisher.publish(twist_msg)
+          
 def main():
         rclpy.init()
-        node = LineFollowerDriver()
+        node = LineFollowerNode()
         rclpy.spin(node)
         node.destroy_node()
         rclpy.shutdown()
