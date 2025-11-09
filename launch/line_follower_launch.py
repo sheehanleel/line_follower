@@ -1,34 +1,25 @@
 import os
-import pathlib
 import launch
-from launch_ros.actions import Node
 from launch import LaunchDescription
 from ament_index_python.packages import get_package_share_directory
-from webots_ros2_driver.webots_launcher import WebotsLauncher, Ros2SupervisorLauncher
-from webots_ros2_driver.utils import controller_url_prefix
+from webots_ros2_driver.webots_launcher import WebotsLauncher
+from webots_ros2_driver.webots_controller import WebotsController
 
 
 def generate_launch_description():
     package_dir = get_package_share_directory('line_follower')
-    robot_description = pathlib.Path(os.path.join(package_dir, 'urdf', 'my_robot.urdf')).read_text()
+    robot_description = os.path.join(package_dir, 'urdf', 'my_robot.urdf')
 
     webots = WebotsLauncher(
         world=os.path.join(package_dir, 'worlds', 'e-puck_line_follower.wbt')
     )
 
-    my_robot_driver = Node(
-        package='line_follower',
-        executable='line_follower_node',
+    my_robot_driver = WebotsController(
+        robot_name='e_puck',
         output='screen',
-        additional_env={'WEBOTS_CONTROLLER_URL': controller_url_prefix() + 'e_puck'},
         parameters=[
-            os.path.join(package_dir, 'config', 'line_follower_params.yaml')
-        ],
-        remappings=[
-            ('/cmd_vel', '/e-puck/cmd_vel'),
-            ('/ground_sensor_0', '/e_puck/ground_sensor_0'),
-            ('/ground_sensor_1', '/e_puck/ground_sensor_1'),
-            ('/ground_sensor_7', '/e_puck/ground_sensor_7'),
+            os.path.join(package_dir, 'config', 'line_follower_params.yaml'),
+            {'plugin': 'line_follower.line_follower_node.MyEpuckDriver'}
         ]
     )
 

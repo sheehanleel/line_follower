@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
-<robot name="My robot">
+<robot name="e_puck">
     <webots>
-        <plugin type="line_follower.line_follower_node.LineFollowerNode" />
+        <plugin type="line_follower.line_follower_node.MyEpuckDriver" />
     </webots>
 </robot>
