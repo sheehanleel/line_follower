@@ -27,7 +27,7 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'line_follower_node = line_follower.line_follower_node:main',
+            'line_follower_node = line_follower.epuck_driver:main',
         ],
     },
 )

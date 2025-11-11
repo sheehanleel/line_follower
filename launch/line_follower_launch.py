@@ -16,11 +16,10 @@ def generate_launch_description():
     )
 
     my_robot_driver = WebotsController(
-        robot_name='e_puck',
+        robot_name='e-puck',
         output='screen',
         parameters=[
             {'robot_description': robot_description_path},
-            {'plugin': 'line_follower.line_follower_node.MyEpuckDriver'}
         ]
     )
     line_follower_node = Node(

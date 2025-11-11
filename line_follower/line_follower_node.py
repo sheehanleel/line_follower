@@ -12,8 +12,9 @@ wheelRadius = 0.025
 #Create a node for webots simulator as ros2 as the controller
 
 class MyEpuckDriver(Node):
-    def __init__(self):
+    def __init__(self, webots_node):
         super().__init__('my_epuck_driver')
+        self.robot = webots_node.robot
 
         #set Motors
         self.left_motor = self.robot.getDevice('left wheel motor')
@@ -96,11 +97,6 @@ class MyEpuckDriver(Node):
         self.cmd_vel_publisher.publish(twist_msg)
           
 def main():
-    rclpy.init()
-    node = MyEpuckDriver()
-    rclpy.spin(node)
-    node.destroy_node()
-    rclpy.shutdown()
     print('Hi from line_follower_node.')
 
 if __name__ == '__main__':
