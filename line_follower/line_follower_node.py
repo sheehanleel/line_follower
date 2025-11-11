@@ -12,7 +12,6 @@ wheelRadius = 0.025
 
 class MyEpuckDriver():
     def __init__(self, webots_node, properties):
-        super().__init__('my_epuck_driver')
         self.robot = webots_node.robot
 
         #set Motors
@@ -96,7 +95,7 @@ class MyEpuckDriver():
         self.cmd_vel_publisher.publish(twist_msg)
           
 def main():
-        rclpy.init()
-        node = MyEpuckDriver()
-        rclpy.spin(node)
-        rclpy.shutdown()
+    print('Hi from line_follower_node.')
+
+if __name__ == '__main__':
+    main()
