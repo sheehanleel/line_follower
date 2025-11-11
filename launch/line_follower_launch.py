@@ -18,7 +18,6 @@ def generate_launch_description():
         robot_name='e_puck',
         output='screen',
         parameters=[
-            os.path.join(package_dir, 'config', 'line_follower_params.yaml'),
             {'robot_description': robot_description_path},
             {'plugin': 'line_follower.line_follower_node.MyEpuckDriver'}
         ]
@@ -27,7 +26,6 @@ def generate_launch_description():
     return LaunchDescription([
         webots,
         my_robot_driver,
-        #ros2_supervisor,
         launch.actions.RegisterEventHandler(
             event_handler=launch.event_handlers.OnProcessExit(
                 target_action=webots,
