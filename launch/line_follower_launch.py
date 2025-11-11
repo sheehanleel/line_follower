@@ -1,6 +1,7 @@
 import os
 import launch
 from launch import LaunchDescription
+from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory
 from webots_ros2_driver.webots_launcher import WebotsLauncher
 from webots_ros2_driver.webots_controller import WebotsController
@@ -22,10 +23,18 @@ def generate_launch_description():
             {'plugin': 'line_follower.line_follower_node.MyEpuckDriver'}
         ]
     )
+    line_follower_node = Node(
+        package='line_follower',
+        executable='line_follower_node',
+        name='line_follower_node',
+        output='screen',
+        parameters=[os.path.join(package_dir, 'config', 'line_follower_params.yaml')]
+    )
 
     return LaunchDescription([
         webots,
         my_robot_driver,
+        line_follower_node,
         launch.actions.RegisterEventHandler(
             event_handler=launch.event_handlers.OnProcessExit(
                 target_action=webots,
