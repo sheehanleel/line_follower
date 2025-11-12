@@ -5,27 +5,19 @@ from std_msgs.msg import Float32
 from sensor_msgs.msg import Range
 from geometry_msgs.msg import Twist
 
-#Robots Constant Attributes
-maxSpeed = 6.28
-halfDistanceBetweenWheels = 0.045
-wheelRadius = 0.025
 
 #Create a node for webots simulator as ros2 as the controller
 
 class LineFollower(Node):
     def __init__(self):
-        super().__init__('line_follower_node')
-
-        #Create Publisher
-        self.publisher = self.create_publisher(Twist, 'cmd_vel', 1)
+        super().__init__('line_follower_node')      
    
-
         # Create subscribers
         self.create_subscription(Range, 'gs0', self.sensor_0_callback, 1)
         self.create_subscription(Range, 'gs1', self.sensor_1_callback, 1)
         self.create_subscription(Range, 'gs2', self.sensor_2_callback, 1)
 
-        # Create publisher
+        #Create Publisher
         self.cmd_vel_publisher = self.create_publisher(Twist, 'cmd_vel', 1)
 
         # Initialize state variables
@@ -49,35 +41,46 @@ class LineFollower(Node):
 
         command_message = Twist()
         command_message.linear.x = 0.1
+        
 
         #threshold = self.get_parameter('sensor_threshold').get_parameter_value().double_value
         #speed_ratio = self.get_parameter('base_speed_ratio').get_parameter_value().double_value
         #max_linear_velocity = self.get_parameter('max_linear_velocity').get_parameter_value().double_value
         #base_speed = speed_ratio * max_linear_velocity
+
         # Get latest sensor readings
         s0 = self.sensor_0
         s1 = self.sensor_1
         s2 = self.sensor_2
+
         # Apply line-following logic
         line_right = s0 < 0.006
         line_center = s1 < 0.006
         line_left = s2 < 0.006
+
+        angular_velocity = 0.0
         # Calculate desired velocities
         #linear_velocity = 0.5
-        angular_velocity = 0.0
+        print(f'Sensor readings: s0={s0}, s1={s1}, s2={s2}')
         if line_center:
-            angular_velocity = 0.0
-        elif line_left:
+            pass  # angular_velocity = 0.0
+        elif line_left and not line_right:
             angular_velocity = 1.0
-        elif line_right:
+        elif line_right and not line_left:
             angular_velocity = -1.0
         else:
             angular_velocity = 0.0
-        # Create Twist message
-        print(f'Sensor readings: s0={s0}, s1={s1}, s2={s2}')
-        #print(f'Computed velocities: linear={linear_velocity}, angular={angular_velocity}')
+
+        #Check angular_velocity value
+        print(f'Angular velocity before publishing: {angular_velocity}')
+
+        # Check if the if statements are correct and logical
+        print(f'Line following status: center={line_center}, left={line_left}, right={line_right}')
+
+        print(f'Computed velocities: linear={command_message.linear.x}, angular={angular_velocity}')
         #twist_msg.linear.x = linear_velocity
         command_message.angular.z = angular_velocity
+
         # Publish command velocities
         # Publish Twist message
         self.cmd_vel_publisher.publish(command_message)
