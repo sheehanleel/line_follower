@@ -1,6 +1,24 @@
 <?xml version="1.0" ?>
 <robot name="e-puck">
     <webots>
+        <device reference="gs0" type="GroundSensor">
+            <ros>
+                <topicName>/gs0</topicName>
+                <alwaysOn>true</alwaysOn>
+            </ros>
+        </device>
+        <device reference="gs1" type="GroundSensor">
+            <ros>
+                <topicName>/gs1</topicName>
+                <alwaysOn>true</alwaysOn>
+            </ros>
+        </device>  
+        <device reference="gs2" type="GroundSensor">
+            <ros>
+                <topicName>/gs2</topicName>
+                <alwaysOn>true</alwaysOn>
+            </ros>
+        </device>    
         <plugin type="line_follower.epuck_driver.MyRobotDriver" />
     </webots>
 </robot>

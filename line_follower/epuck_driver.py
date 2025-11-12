@@ -17,20 +17,20 @@ class MyRobotDriver:
         self.rightMotor.setPosition(float('inf'))
         self.rightMotor.setVelocity(0)
 
-        self.__target_twist = Twist()
+        self.target_twist = Twist()
 
         rclpy.init(args=None)
-        self.__node = rclpy.create_node('my_epuck_driver')
-        self.__node.create_subscription(Twist, 'cmd_vel', self.__cmd_vel_callback, 1)
+        self.node = rclpy.create_node('my_epuck_driver')
+        self.node.create_subscription(Twist, 'cmd_vel', self.cmd_vel_callback, 1)
 
-    def __cmd_vel_callback(self, twist):
-        self.__target_twist = twist
+    def cmd_vel_callback(self, twist):
+        self.target_twist = twist
 
     def step(self):
-        rclpy.spin_once(self.__node, timeout_sec=0)
+        rclpy.spin_once(self.node, timeout_sec=0)
 
-        forward_speed = self.__target_twist.linear.x
-        angular_speed = self.__target_twist.angular.z
+        forward_speed = self.target_twist.linear.x
+        angular_speed = self.target_twist.angular.z
 
         command_motor_left = (forward_speed - angular_speed * HALF_DISTANCE_BETWEEN_WHEELS) / WHEEL_RADIUS
         command_motor_right = (forward_speed + angular_speed * HALF_DISTANCE_BETWEEN_WHEELS) / WHEEL_RADIUS

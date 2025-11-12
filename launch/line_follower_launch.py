@@ -25,9 +25,8 @@ def generate_launch_description():
     line_follower_node = Node(
         package='line_follower',
         executable='line_follower_node',
-        name='line_follower_node',
         output='screen',
-        parameters=[os.path.join(package_dir, 'config', 'line_follower_params.yaml')]
+        #parameters=[os.path.join(package_dir, 'config', 'line_follower_params.yaml')]
     )
 
     return LaunchDescription([

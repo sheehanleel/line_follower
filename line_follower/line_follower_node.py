@@ -2,6 +2,7 @@
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Float32
+from sensor_msgs.msg import Range
 from geometry_msgs.msg import Twist
 
 #Robots Constant Attributes
@@ -11,74 +12,58 @@ wheelRadius = 0.025
 
 #Create a node for webots simulator as ros2 as the controller
 
-class MyEpuckDriver(Node):
-    def __init__(self, webots_node):
-        super().__init__('my_epuck_driver')
-        self.robot = webots_node.robot
+class LineFollower(Node):
+    def __init__(self):
+        super().__init__('line_follower_node')
 
-        #set Motors
-        self.left_motor = self.robot.getDevice('left wheel motor')
-        self.right_motor = self.robot.getDevice('right wheel motor')
-
-        self.left_motor.setPosition(float('inf'))
-        self.right_motor.setPosition(float('inf'))
-
-        self.left_motor.setVelocity(0.0)
-        self.right_motor.setVelocity(0.0)
-
-        # Declare parameters
-        self.declare_parameter('sensor_threshold', 600)
-        self.declare_parameter('base_speed_ratio', 0.5)
-        self.declare_parameter('max_linear_velocity', 0.2)
+        #Create Publisher
+        self.publisher = self.create_publisher(Twist, 'cmd_vel', 1)
+   
 
         # Create subscribers
-        self.create_subscription(Float32, 'ground_sensor_0', self.sensor_0_callback, 10)
-        self.create_subscription(Float32, 'ground_sensor_1', self.sensor_1_callback, 10)
-        self.create_subscription(Float32, 'ground_sensor_7', self.sensor_7_callback, 10)
+        self.create_subscription(Range, 'gs0', self.sensor_0_callback, 1)
+        self.create_subscription(Range, 'gs1', self.sensor_1_callback, 1)
+        self.create_subscription(Range, 'gs2', self.sensor_2_callback, 1)
 
         # Create publisher
-        self.cmd_vel_publisher = self.create_publisher(Twist, 'cmd_vel', 10)
+        self.cmd_vel_publisher = self.create_publisher(Twist, 'cmd_vel', 1)
 
         # Initialize state variables
         self.sensor_0 = 0.0
         self.sensor_1 = 0.0
-        self.sensor_7 = 0.0
+        self.sensor_2 = 0.0
 
-        self.target_twist = Twist()
-
-        # Create control timer
-        self.control_timer = self.create_timer(0.1, self.control_loop)
-
-    def cmd_vel_callback(self, msg):
-        self.target_twist = msg
+        command_message = Twist()
 
     def sensor_0_callback(self, msg):
         # Store sensor value when new data arrives
-        self.sensor_0 = msg.data
+        self.sensor_0 = msg.range
 
     def sensor_1_callback(self, msg):
         # Store sensor value when new data arrives
-        self.sensor_1 = msg.data
+        self.sensor_1 = msg.range
         
-    def sensor_7_callback(self, msg):
+    def sensor_2_callback(self, msg):
         # Store sensor value when new data arrives
-        self.sensor_7 = msg.data
+        self.sensor_2 = msg.range
 
-    def control_loop(self):
-        threshold = self.get_parameter('sensor_threshold').get_parameter_value().double_value
-        speed_ratio = self.get_parameter('base_speed_ratio').get_parameter_value().double_value
-        max_linear_velocity = self.get_parameter('max_linear_velocity').get_parameter_value().double_value
-        base_speed = speed_ratio * max_linear_velocity
+        command_message = Twist()
+        command_message.linear.x = 0.1
+
+        #threshold = self.get_parameter('sensor_threshold').get_parameter_value().double_value
+        #speed_ratio = self.get_parameter('base_speed_ratio').get_parameter_value().double_value
+        #max_linear_velocity = self.get_parameter('max_linear_velocity').get_parameter_value().double_value
+        #base_speed = speed_ratio * max_linear_velocity
         # Get latest sensor readings
         s0 = self.sensor_0
         s1 = self.sensor_1
-        s7 = self.sensor_7
+        s2 = self.sensor_2
         # Apply line-following logic
-        line_right = s0 < threshold
-        line_center = s1 < threshold
-        line_left = s7 < threshold
+        line_right = s0 < 0.006
+        line_center = s1 < 0.006
+        line_left = s2 < 0.006
         # Calculate desired velocities
-        linear_velocity = base_speed
+        #linear_velocity = 0.5
         angular_velocity = 0.0
         if line_center:
             angular_velocity = 0.0
@@ -89,14 +74,20 @@ class MyEpuckDriver(Node):
         else:
             angular_velocity = 0.0
         # Create Twist message
-        twist_msg = Twist()
-        twist_msg.linear.x = linear_velocity
-        twist_msg.angular.z = angular_velocity
+        print(f'Sensor readings: s0={s0}, s1={s1}, s2={s2}')
+        #print(f'Computed velocities: linear={linear_velocity}, angular={angular_velocity}')
+        #twist_msg.linear.x = linear_velocity
+        command_message.angular.z = angular_velocity
         # Publish command velocities
         # Publish Twist message
-        self.cmd_vel_publisher.publish(twist_msg)
+        self.cmd_vel_publisher.publish(command_message)
           
-def main():
+def main(args=None):
+    rclpy.init(args=args)
+    line = LineFollower()
+    rclpy.spin(line)
+    line.destroy_node() 
+    rclpy.shutdown()
     print('Hi from line_follower_node.')
 
 if __name__ == '__main__':
