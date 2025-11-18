@@ -1,5 +1,4 @@
 LineFollower:
   ros__parameters:
-    sensor_threshold: 0.06
-    base_speed_ratio: 0.5
-    max_linear_velocity: 0.2
+    sensor_threshold: 0.006
+    base_speed: 0.1

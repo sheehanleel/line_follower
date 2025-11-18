@@ -26,6 +26,9 @@ class LineFollower(Node):
         self.sensor_2 = 0.0
 
         command_message = Twist()
+    
+    #def cmd_vel_callback(self, twist):
+        #self.target_twist = twist
 
     def sensor_0_callback(self, msg):
         # Store sensor value when new data arrives
@@ -40,27 +43,26 @@ class LineFollower(Node):
         self.sensor_2 = msg.range
 
         command_message = Twist()
-        command_message.linear.x = 0.1
-        
 
-        #threshold = self.get_parameter('sensor_threshold').get_parameter_value().double_value
-        #speed_ratio = self.get_parameter('base_speed_ratio').get_parameter_value().double_value
-        #max_linear_velocity = self.get_parameter('max_linear_velocity').get_parameter_value().double_value
-        #base_speed = speed_ratio * max_linear_velocity
+        # Get parameters
+        threshold = self.get_parameter('sensor_threshold').get_parameter_value().double_value
+        speed = self.get_parameter('base_speed').get_parameter_value().double_value
+
+        command_message.linear.x = speed #set the speed of the robot in the YAML file
 
         # Get latest sensor readings
         s0 = self.sensor_0
         s1 = self.sensor_1
         s2 = self.sensor_2
+        #speed = self.target_twist.linear.x
 
         # Apply line-following logic
-        line_right = s0 < 0.006
-        line_center = s1 < 0.006
-        line_left = s2 < 0.006
+        line_right = s0 < threshold
+        line_center = s1 < threshold
+        line_left = s2 < threshold  
 
         angular_velocity = 0.0
         # Calculate desired velocities
-        #linear_velocity = 0.5
         print(f'Sensor readings: s0={s0}, s1={s1}, s2={s2}')
         if line_center:
             pass  # angular_velocity = 0.0
@@ -78,7 +80,7 @@ class LineFollower(Node):
         print(f'Line following status: center={line_center}, left={line_left}, right={line_right}')
 
         print(f'Computed velocities: linear={command_message.linear.x}, angular={angular_velocity}')
-        #twist_msg.linear.x = linear_velocity
+
         command_message.angular.z = angular_velocity
 
         # Publish command velocities
