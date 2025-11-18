@@ -11,6 +11,10 @@ from geometry_msgs.msg import Twist
 class LineFollower(Node):
     def __init__(self):
         super().__init__('line_follower_node')      
+
+        # Declare parameters with default values
+        self.declare_parameter('sensor_threshold', 0.0)  # Distance threshold to
+        self.declare_parameter('base_speed', 0.0)        # Base linear speed of the robot
    
         # Create subscribers
         self.create_subscription(Range, 'gs0', self.sensor_0_callback, 1)
