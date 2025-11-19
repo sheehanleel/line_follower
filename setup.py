@@ -16,10 +16,10 @@ setup(
     data_files=data_files,
     install_requires=['setuptools'],
     zip_safe=True,
-    maintainer='webot',
-    maintainer_email='webot@todo.todo',
-    description='TODO: Package description',
-    license='TODO: License declaration',
+    maintainer='Sheehan',
+    maintainer_email='sheehanleel@yahoo.com',
+    description='Assessment Task 3 – ROS2 Line Follower',
+    license='Apache 2.0',
     extras_require={
         'test': [
             'pytest',
