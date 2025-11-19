@@ -6,7 +6,7 @@ Robot successfully follows the line for at least half a lap, using ROS2 pre-exis
 
 To launch the package -
 run
-ros2 launch line_follower line_follower_launch.py
+"ros2 launch line_follower line_follower_launch.py"
 
 ## License
 
